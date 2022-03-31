@@ -1,0 +1,52 @@
+Saioc Marius Andrei 
+
+sensors_input
+La sensors_input unde pur si simplu am facut media si niste if-uri pentru conditii
+am avut o mica problema pana am realizat ca Verilog nu aproximeaza, ci pur si simplu
+ce e in dreapta virgulei se pierde, astfel a trebuit sa adaug 0.5 pentru fiecare senzor
+la calcularea sumelor pentru ca valorile care ar fi trecut de x.5 acum sa treaca la x+1,
+simuland astfel o aproximare.
+
+
+display_and_drop
+Acel modul a iesit rapid, conditionate de valorile intrarilor, iesirile trebuiau
+sa reprezinte literele corespunzatoare pentru display-ul pe 7 segmente.
+
+
+baggage_drop
+Aici doar am facut legatura intre module, tinand cont si de impartirea la 2 
+a rezultatului din radical conform formulei.
+
+
+square_root
+Am inceput prin a trece prin resurse si mi-a sarit in ochi cam singura bucata de 
+cod din resure, la algoritmul CORDIC. Dupa ce am inteles in mare cam cum functioneaza
+am trecut la a-l scrie in Verilog. Avand in vedere ca input-ul nostru in  functia radical
+va fi pe 8 biti, adica maxim 255, patratul base-ului, cu ajutorul caruia se caluleaza
+out-ul nu poate sa fie mai mare de 255, un base=16 ar fi dat 256, deci am ales base=8.
+Pentru ca la fiecare iteratie base-ul va fi injumatatit pana ajunge la 0, for-ul are 
+4 iteratii. Astfel am reusit sa calculez partea intreaga a radicalului.
+
+Dupa alte cateva teste, am inteles ca variabila out este pe 16 biti pentru ca pastreaza in 
+ultimii 8 biti ceea ce normal ar fi dupa virgula. Asa ca am fost nevoit sa shiftez rezultatul
+obtinut anterior cu 8 biti la stanga.
+
+
+La partea din dreapta virgulei, dupa ceva timp de gandire, am zis sa incerc acelasi principiu 
+pe care l-a folosit CORDIC la partea intreaga (aici m-a ajutat si tranformarea din binar cu
+floating point in decimal; am realizat ca exact ca si mai devreme, stiu din ce este compusa
+partea fractionara 0.5+ 0.5^2+ 0.5^3....). Astfel, stiam numarul de la care plec (0.5, in binar
+pe 8 biti dupa virgula fiind 0.1000_0000), acesta fiind noul base, pe care l-am numit dec, iar 
+la fiecare iteratie se va shita la dreapta cu 1, pentru a obtine 0.5^2, 0.5^3 etc. In for sunt
+8 iteratii de aceasta data, pentru ca avem de completat cu 8 biti, testandu-se pentru fiecare 
+bit adaugat, daca patratul rezultatului este mai mare decat in sau nu, verificand astfel daca
+pastram bitul pe iteratia respectiva sau il scadem la loc din out.
+
+Am folosit si alta variabila reg pe 24 de biti pentru a putea face comparatia aceasta din if 
+(pentru ca in-ul initial este pe 8 biti, iar noi in out pastram ultimii 8 biti pentru partea fractionara
+si primii 8 pentru cea intreaga. Astfel la ridicarea la patrat al lui out pe 16 biti, ar 
+rezulta o variabila pe 32, dar stiind ca primii 4 sunt mereu 0, pentru variabila aleasa 24 au
+fost suficienti. Si am pastrat in ea in-ul shiftat corespunzator).
+
+
+
